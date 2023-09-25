@@ -3,6 +3,7 @@ package com.ltp.contacts;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,12 +47,22 @@ class ContactsApplicationTests {
 
 	@Test
 	public void getContactByIdTest() throws Exception {
-
+		RequestBuilder request = MockMvcRequestBuilders.get("/contact/1");
+		mockMvc.perform(request)
+				.andExpect(status().isOk()) // will it return 200?
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)) // will it return json?
+				.andExpect(jsonPath("$.name").value(contacts[0].getName())) // will it get the right name given index 0
+				.andExpect(jsonPath("$.phoneNumber").value(contacts[0].getPhoneNumber()));
 	}
 	
 	@Test
 	public void getAllContactsTest() throws Exception {
-
+		RequestBuilder request = MockMvcRequestBuilders.get("/contact/all");
+		mockMvc.perform(request)
+				.andExpect(status().isOk()) // will it return 200?
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON)) // will it return json?
+				.andExpect(jsonPath("$.size()").value(contacts.length)) // will it get the right size
+				.andExpect(jsonPath("$.[?(@.id == \"2\" && @.name == \"Tyrion Lannister\" && @.phoneNumber == \"4145433332\")]").exists());
 	}
 
 	@Test
@@ -64,7 +77,8 @@ class ContactsApplicationTests {
 
 	@Test
 	public void contactNotFoundTest() throws Exception {
-
+		RequestBuilder request = MockMvcRequestBuilders.get("/contact/4");
+		mockMvc.perform(request).andExpect(status().isNotFound());
 	}
 
 
