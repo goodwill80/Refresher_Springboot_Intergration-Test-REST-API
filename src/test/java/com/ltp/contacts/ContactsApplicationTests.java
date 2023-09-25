@@ -1,6 +1,7 @@
 package com.ltp.contacts;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -25,6 +26,9 @@ class ContactsApplicationTests {
 
 	@Autowired
 	private ContactRepository contactRepository;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	private Contact[] contacts = new Contact[] {
 		new Contact("1", "Jon Snow", "6135342524"),
@@ -67,12 +71,18 @@ class ContactsApplicationTests {
 
 	@Test
 	public void validContactCreation() throws Exception {
-
+		RequestBuilder request = MockMvcRequestBuilders.post("/contact")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new Contact("Rayan", "1234567")));
+		mockMvc.perform(request).andExpect(status().isCreated());
 	}
 
 	@Test
 	public void invalidContactCreation() throws Exception {
-
+		RequestBuilder request = MockMvcRequestBuilders.post("/contact")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new Contact("", "")));
+		mockMvc.perform(request).andExpect(status().isBadRequest());
 	}
 
 	@Test
